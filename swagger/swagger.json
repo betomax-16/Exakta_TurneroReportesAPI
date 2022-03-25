@@ -1,0 +1,1433 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API documentation for the Exakta Laboratories auth application",
+        "version": "1.0.0",
+        "title": "API Auth",
+        "contact": {
+            "email": "exakta@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "schemes": ["http"],
+    "host": "localhost:5000",
+    "basePath": "/api",
+    "tags":[
+        {
+            "name": "Credentials",
+            "description": "CRUD with credentials"
+        },
+        {
+            "name": "Users",
+            "description": "CRUD with users"
+        },
+        {
+            "name": "Sucursals",
+            "description": "CRUD with sucursals"
+        }
+    ],
+    "paths" : {
+        "/user": {
+            "get": {
+                "tags": ["Users"],
+                "summary" : "Get all the users",
+                "description": "Get all the users",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "superRol",
+                        "schema": {
+                            "type": "string",
+                            "example": "Admin|eq"
+                        },
+                        "description": "Filter data",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/UserRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": [
+                                    {
+                                        "_id": "61cfc31b0d37aab258ec05f9",
+                                        "username": "beto",
+                                        "name": "Roberto",
+                                        "firstLastName": "Castillo",
+                                        "secondLastName": "Medina",
+                                        "superRol": "pendiente",
+                                        "sucursal": "Angelópolis",
+                                        "createdAt": "2022-01-01T02:57:31.057Z",
+                                        "updatedAt": "2022-01-01T02:57:31.057Z",
+                                        "__v": 0
+                                    }
+                                ],
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Users"],
+                "summary" : "Create a user",
+                "description": "Create a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "user",
+                        "description": "User object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/UserRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61cfc31b0d37aab258ec05f9",
+                                    "username": "beto",
+                                    "name": "Roberto",
+                                    "firstLastName": "Castillo",
+                                    "secondLastName": "Medina",
+                                    "superRol": "pendiente",
+                                    "sucursal": "Angelópolis",
+                                    "createdAt": "2022-01-01T02:57:31.057Z",
+                                    "updatedAt": "2022-01-01T02:57:31.057Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{username}": {
+            "put": {
+                "tags": ["Users"],
+                "summary" : "Update a user",
+                "description": "Update a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "username",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "rcastillo"
+                        },
+                        "description": "Username of the user"
+                    },
+                    {
+                        "in": "body",
+                        "name": "user",
+                        "description": "User object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/UserRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "_id": "61cfc31b0d37aab258ec05f9",
+                                    "username": "beto",
+                                    "name": "Roberto",
+                                    "firstLastName": "Castillo",
+                                    "secondLastName": "Medina",
+                                    "superRol": "pendiente",
+                                    "sucursal": "Angelópolis",
+                                    "createdAt": "2022-01-01T02:57:31.057Z",
+                                    "updatedAt": "2022-01-01T02:57:31.057Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Users"],
+                "summary" : "Delete a user",
+                "description": "Delete a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "username",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "rcastillo"
+                        },
+                        "description": "Username of the user"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object",
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "message": "Successfully deleted user."
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sucursal": {
+            "get": {
+                "tags": ["Sucursals"],
+                "summary" : "Get all the sucursals",
+                "description": "Get all the sucursals",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string",
+                            "example": "Angelópolis|eq"
+                        },
+                        "description": "Filter data",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SucursalRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": [
+                                    {
+                                        "_id": "61cfc1464e614ba143259f54",
+                                        "name": "Angelópolis",
+                                        "address": "Av. del Sol 2519 Col. Concepción la Cruz Reserva Territorial Atlixcáyotl Puebla, Pue, C.P. 72197",
+                                        "phoneNums": [
+                                            "(222) 303.31.00 ",
+                                            "(222) 240.10.10"
+                                        ],
+                                        "reference": "Entre el Home Depot de Angelópolis y la prepa Ibero a un costado de CINIA.",
+                                        "createdAt": "2022-01-01T02:49:42.599Z",
+                                        "updatedAt": "2022-01-01T02:49:42.599Z",
+                                        "__v": 0
+                                    }
+                                ],
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Sucursals"],
+                "summary" : "Create a sucursal",
+                "description": "Create a sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "sucursal",
+                        "description": "Sucursal object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SucursalReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/SucursalRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61cfc1464e614ba143259f54",
+                                    "name": "Angelópolis",
+                                    "address": "Av. del Sol 2519 Col. Concepción la Cruz Reserva Territorial Atlixcáyotl Puebla, Pue, C.P. 72197",
+                                    "phoneNums": [
+                                        "(222) 303.31.00 ",
+                                        "(222) 240.10.10"
+                                    ],
+                                    "reference": "Entre el Home Depot de Angelópolis y la prepa Ibero a un costado de CINIA.",
+                                    "createdAt": "2022-01-01T02:49:42.599Z",
+                                    "updatedAt": "2022-01-01T02:49:42.599Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sucursal/{name}": {
+            "put": {
+                "tags": ["Sucursals"],
+                "summary" : "Update a sucursal",
+                "description": "Update a sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Angelópolis"
+                        },
+                        "description": "Name of the sucursal"
+                    },
+                    {
+                        "in": "body",
+                        "name": "user",
+                        "description": "Partial user object",
+                        "schema": {
+                            "$ref": "#/definitions/SucursalUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SucursalRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "_id": "61cfc1464e614ba143259f54",
+                                    "name": "Angelópolis",
+                                    "address": "Av. del Sol 2519 Col. Concepción la Cruz Reserva Territorial Atlixcáyotl Puebla, Pue, C.P. 72197",
+                                    "phoneNums": [
+                                        "(222) 303.31.00 ",
+                                        "(222) 240.10.10"
+                                    ],
+                                    "reference": "Entre el Home Depot de Angelópolis y la prepa Ibero a un costado de CINIA.",
+                                    "createdAt": "2022-01-01T02:49:42.599Z",
+                                    "updatedAt": "2022-01-01T02:49:42.599Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Sucursals"],
+                "summary" : "Delete a sucursal",
+                "description": "Delete a sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Angelópolis"
+                        },
+                        "description": "Name of the sucursal"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object",
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "message": "Successfully deleted user."
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": ["Credentials"],
+                "summary" : "Auth a user",
+                "description": "Auth a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "credentials",
+                        "description": "Credential object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CredentialReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/UserRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61cfc31b0d37aab258ec05f9",
+                                    "username": "beto",
+                                    "name": "Roberto",
+                                    "firstLastName": "Castillo",
+                                    "secondLastName": "Medina",
+                                    "superRol": "pendiente",
+                                    "sucursal": "Angelópolis",
+                                    "createdAt": "2022-01-01T02:57:31.057Z",
+                                    "updatedAt": "2022-01-01T02:57:31.057Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logup": {
+            "post": {
+                "tags": ["Credentials"],
+                "summary" : "Create credential of a user",
+                "description": "Create credential of a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "credentials",
+                        "description": "Credential object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/NewCredentialReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/UserRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61cfc31b0d37aab258ec05f9",
+                                    "username": "beto",
+                                    "name": "Roberto",
+                                    "firstLastName": "Castillo",
+                                    "secondLastName": "Medina",
+                                    "superRol": "pendiente",
+                                    "sucursal": "Angelópolis",
+                                    "createdAt": "2022-01-01T02:57:31.057Z",
+                                    "updatedAt": "2022-01-01T02:57:31.057Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/credentials/{username}": {
+            "put": {
+                "tags": ["Credentials"],
+                "summary" : "Update password from a user",
+                "description": "Update password from a user",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "username",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "rcastillo"
+                        },
+                        "description": "Username of the user"
+                    },
+                    {
+                        "in": "body",
+                        "name": "password",
+                        "description": "Password object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateCredentialReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/UserRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61cfc31b0d37aab258ec05f9",
+                                    "username": "beto",
+                                    "name": "Roberto",
+                                    "firstLastName": "Castillo",
+                                    "secondLastName": "Medina",
+                                    "superRol": "pendiente",
+                                    "sucursal": "Angelópolis",
+                                    "createdAt": "2022-01-01T02:57:31.057Z",
+                                    "updatedAt": "2022-01-01T02:57:31.057Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Credentials"],
+                "summary" : "Delete a credential",
+                "description": "Delete a credential",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "username",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "rcastillo"
+                        },
+                        "description": "Username of the user"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object",
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "message": "Successfully deleted user."
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }, 
+    "definitions": {
+        "InvalidRes": {
+            "type": "object",
+            "properties": {
+                "message":  {
+                    "type": "string"
+                }
+            }
+        },
+        "UserRes": {
+            "type": "object",
+            "properties": {
+                "_id":  {
+                    "type": "string"
+                },
+                "username":  {
+                    "type": "string"
+                },
+                "name":  {
+                    "type": "string"
+                },
+                "firstLastName":  {
+                    "type": "string"
+                },
+                "secondLastName":  {
+                    "type": "string"
+                },
+                "sucursal":  {
+                    "type": "string"
+                },
+                "superRol":  {
+                    "type": "string"
+                },
+                "createdAt":  {
+                    "type": "string"
+                },
+                "updatedAt":  {
+                    "type": "string"
+                },
+                "__v":  {
+                    "type": "number"
+                }
+            }
+        },
+        "UserReq": {
+            "type": "object",
+            "properties": {
+                "username":  {
+                    "type": "string"
+                },
+                "name":  {
+                    "type": "string"
+                },
+                "firstLastName":  {
+                    "type": "string"
+                },
+                "secondLastName":  {
+                    "type": "string"
+                },
+                "sucursal":  {
+                    "type": "string"
+                },
+                "superRol":  {
+                    "type": "string"
+                }
+            },
+            "required": [ 
+                "username", 
+                "name", 
+                "firstLastName", 
+                "secondLastName", 
+                "sucursal", 
+                "superRol" 
+            ],
+            "example": {
+                "username": "beto",
+                "name": "Roberto",
+                "firstLastName": "Castillo",
+                "secondLastName": "Medina",
+                "superRol": "Ing de software",
+                "sucursal": "Angelópolis"
+            }
+        },
+        "UserUpdateReq": {
+            "type": "object",
+            "properties": {
+                "rol":  {
+                    "type": "string"
+                }
+            },
+            "example": {
+                "rol": "Vigia"
+            }
+        },
+        "SucursalRes": {
+            "type": "object",
+            "properties": {
+                "_id":  {
+                    "type": "string"
+                },
+                "name":  {
+                    "type": "string"
+                },
+                "phoneNums":  {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "reference":  {
+                    "type": "string"
+                },
+                "createdAt":  {
+                    "type": "string"
+                },
+                "updatedAt":  {
+                    "type": "string"
+                },
+                "__v":  {
+                    "type": "number"
+                }
+            }
+        },
+        "SucursalReq": {
+            "type": "object",
+            "properties": {
+                "name":  {
+                    "type": "string"
+                },
+                "address":  {
+                    "type": "string"
+                },
+                "reference":  {
+                    "type": "string"
+                },
+                "phoneNums":  {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [ 
+                "name", 
+                "address", 
+                "reference", 
+                "phoneNums"
+            ],
+            "example": {
+                "name":"Explanada",
+                "address":"Plaza Explanada Calle Alejandra #512 local S-19A San Pedro Cholula, Pue. C.P. 72760",
+                "reference":"Entrando a Plaza Explanada, antes del centro de espectáculos Auditorio Explanada.",
+                "phoneNums": ["(222) 399.38.05"]
+            }
+        },
+        "SucursalUpdateReq": {
+            "type": "object",
+            "properties": {
+                "name":  {
+                    "type": "string"
+                },
+                "address":  {
+                    "type": "string"
+                },
+                "reference":  {
+                    "type": "string"
+                },
+                "phoneNums":  {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "example": {
+                "reference": "Nueva dirección"
+            }
+        },
+        "CredentialReq": {
+            "type": "object",
+            "properties": {
+                "username":  {
+                    "type": "string"
+                },
+                "password":  {
+                    "type": "string"
+                }
+            },
+            "required": [ 
+                "username", 
+                "password"
+            ],
+            "example": {
+                "username":"beto",
+                "password":"beto"
+            }
+        },
+        "NewCredentialReq": {
+            "type": "object",
+            "properties": {
+                "username":  {
+                    "type": "string"
+                },
+                "password":  {
+                    "type": "string"
+                },
+                "name":  {
+                    "type": "string"
+                },
+                "firstLastName":  {
+                    "type": "string"
+                },
+                "secondLastName":  {
+                    "type": "string"
+                },
+                "superRol":  {
+                    "type": "string"
+                },
+                "sucursal":  {
+                    "type": "string"
+                }
+            },
+            "required": [ 
+                "username", 
+                "password",
+                "name",
+                "firstLastName",
+                "secondLastName",
+                "superRol",
+                "sucursal"
+            ],
+            "example": {
+                "username":"beto",
+                "password":"beto",
+                "name": "Roberto",
+                "firstLastName": "Castillo",
+                "secondLastName": "Medina",
+                "superRol": "Ing de software",
+                "sucursal": "Angelópolis"
+            }
+        },
+        "UpdateCredentialReq": {
+            "type": "object",
+            "properties": {
+                "password":  {
+                    "type": "string"
+                }
+            },
+            "required": [ 
+                "password"
+            ],
+            "example": {
+                "password":"beto"
+            }
+        }
+    }
+}
