@@ -432,18 +432,18 @@ class TraceHistoryController {
                 }
             });
 
-            console.log(table.length);
+            // console.log(table.length);
             
             let resum: any[] = [];
             sucursals.forEach(suc => {
-                console.log(`=============${suc}=============`);
+                // console.log(`=============${suc}=============`);
                 const dataSucursal = table.filter(r => r.sucursal === suc);
                 const shifts = dataSucursal.filter(r => r.state === 'espera');
-                console.log(`Suc: ${dataSucursal.length}`);
-                console.log(`Turns: ${shifts.length}`);
+                // console.log(`Suc: ${dataSucursal.length}`);
+                // console.log(`Turns: ${shifts.length}`);
                 
                 shifts.forEach(turn => {
-                    console.log(`------------${turn.turn}-----------`);
+                    // console.log(`------------${turn.turn}-----------`);
                     const traces = dataSucursal.filter(r => 
                         r.turn === turn.turn && 
                         moment(turn.startDate).format('YYYY-MM-DD') === moment(r.startDate).format('YYYY-MM-DD'));
