@@ -1,347 +1,296 @@
 import TraceHistory from '../models/traceHistory';
+import { RequestExternalAPI } from "../utils/requestExternalAPI";
 import moment from "moment";
 import { diacriticSensitiveRegex } from "../models/utils/queryRequest";
 
 class TraceHistoryController {
     static async generalReport(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
+        // try {
+        //     const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
+
+        //     if (sucursal) {
+        //         let str = diacriticSensitiveRegex(sucursal);
+        //         query.push({ sucursal: { $regex: `^${str}$`, $options: "i" } });
+        //     }
+
+        //     let query2= {};
+        //     if (area) {
+        //         let str = diacriticSensitiveRegex(area);
+        //         query2 = { area: { $regex: `^${str}$`, $options: "i" } };
+        //     }
+
+        //     const res = await TraceHistory.aggregate([
+        //         {
+        //             $match: { '$and': query }
+        //         },
+        //         {
+        //             $lookup: {
+        //                  from: "TurnHistory",
+        //                  localField: "idTurn",
+        //                  foreignField: "_id",
+        //                  as: "dataTurn"
+        //             }
+        //         },
+        //         { $unwind : "$dataTurn" },
+        //         {   $project: { 
+        //                 _id: 1,
+        //                 turn: 1,
+        //                 startDate: 1,
+        //                 finalDate: 1,
+        //                 state: 1,
+        //                 sucursal: 1,
+        //                 ubication: 1,
+        //                 sourceSection: 1,
+        //                 area: "$dataTurn.area"
+        //             } 
+        //         },
+        //         {
+        //             $match: query2
+        //         }
+        //     ]);
+
+        //     //Creacion de matriz de milisegundos
+        //     const sucursals: string[] = [];
+        //     const areas: string[] = [];
+        //     const table: any[] = [];
+        //     res.forEach(element => {
+        //         const start = moment(element.startDate);
+        //         const final = moment(element.finalDate);
+
+        //         table.push({
+        //             sucursal: element.sucursal,
+        //             area: element.area,
+        //             turn: element.turn,
+        //             state: element.state,
+        //             sourceSection: element.sourceSection,
+        //             timeMili: final.diff(start)
+        //         });
+
+        //         if (!sucursals.includes(element.sucursal)) {
+        //             sucursals.push(element.sucursal);
+        //         }
+
+        //         if (!areas.includes(element.area)) {
+        //             areas.push(element.area);
+        //         }
+        //     });
+
+        //     const resum: any[] = [];
+        //     sucursals.forEach(suc => {
+        //         const dataSucursal = table.filter(r => r.sucursal === suc);
+        //         areas.forEach(area => {
+        //             const dataArea = dataSucursal.filter(r => r.area === area);
+
+        //             const turns: string[] = [];
+        //             let waitTime: number = 0;
+        //             let serviceTime: number = 0;
+        //             let attentionTime: number = 0;
+        //             let canceledShifts: number = 0;
+        //             let shiftsFinished: number = 0;
+        //             let maxWaitTime: number = 0;
+        //             let maxWaitAttentionTime: number = 0;
+
+        //             let arrayLabRecep:any[] = [];
+        //             let arrayLabToma:any[] = [];
+
+        //             if (area === 'Laboratorio') {
+        //                 dataArea.forEach(element => {
+        //                     if (element.state === 'espera') {
+        //                         turns.push(element.turn);
+        //                     }
+    
+        //                     if (element.state === 'cancelado') {
+        //                         canceledShifts++;
+        //                     }
+    
+        //                     if (element.state === 'terminado') {
+        //                         shiftsFinished++;
+        //                     }
+    
+        //                     if (element.state === 're-call') {
+        //                         const tracesRes = dataArea.filter(r => r.sourceSection === element.sourceSection);
+        //                         const resFinish = tracesRes.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                         if (resFinish) {
+        //                             attentionTime += element.timeMili;
+        //                             maxWaitAttentionTime += element.timeMili;
+        //                         }
+        //                         else {
+        //                             const resCancel = tracesRes.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                             if (resCancel) {
+        //                                 waitTime += element.timeMili;
+        //                                 maxWaitTime += element.timeMili;
+        //                             }
+        //                         }
+        //                     }
+    
+        //                     if (element.state === 'espera' || element.state === 'espera toma') {
+        //                         waitTime += element.timeMili;
+        //                         if (maxWaitTime < element.timeMili) {
+        //                             maxWaitTime = element.timeMili;
+        //                         }
+        //                     }
+    
+        //                     if (element.state === 'en atencion' || element.state === 'en toma') {
+        //                         attentionTime += element.timeMili;
+        //                         if (maxWaitAttentionTime < element.timeMili) {
+        //                             maxWaitAttentionTime = element.timeMili;
+        //                         }
+        //                     }
+    
+        //                     serviceTime += element.timeMili;
+        //                 });
+
+
+        //                 // const averageWaitTime = turns.length === 0 ? 0 : waitTime / turns.length;
+        //                 // const averageAttentionTime = turns.length === 0 ? 0 : attentionTime / turns.length;
+        //                 // const averageServiceTime = turns.length === 0 ? 0 : serviceTime / turns.length;
+
+        //                 // resum.push({
+        //                 //     sucursal: suc,
+        //                 //     area: area,
+        //                 //     shiftsCreated: turns.length,
+        //                 //     canceledShifts: canceledShifts,
+        //                 //     shiftsFinished: shiftsFinished,
+        //                 //     averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
+        //                 //     averageAttentionTime: TraceHistoryController.msToTime(averageAttentionTime),
+        //                 //     averageServiceTime: TraceHistoryController.msToTime(averageServiceTime),
+        //                 //     maxWaitTime: TraceHistoryController.msToTime(maxWaitTime),
+        //                 //     maxWaitAttentionTime: TraceHistoryController.msToTime(maxWaitAttentionTime)
+        //                 // });
+        //             }
+        //             else {
+        //                 dataArea.forEach(element => {
+        //                     if (element.state === 'espera') {
+        //                         turns.push(element.turn);
+        //                     }
+    
+        //                     if (element.state === 'cancelado') {
+        //                         canceledShifts++;
+        //                     }
+    
+        //                     if (element.state === 'terminado') {
+        //                         shiftsFinished++;
+        //                     }
+    
+        //                     if (element.state === 're-call') {
+        //                         const tracesRes = dataArea.filter(r => r.sourceSection === element.sourceSection);
+        //                         const resFinish = tracesRes.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                         if (resFinish) {
+        //                             attentionTime += element.timeMili;
+        //                             maxWaitAttentionTime += element.timeMili;
+        //                         }
+        //                         else {
+        //                             const resCancel = tracesRes.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                             if (resCancel) {
+        //                                 waitTime += element.timeMili;
+        //                                 maxWaitTime += element.timeMili;
+        //                             }
+        //                         }
+        //                     }
+    
+        //                     if (element.state === 'espera' || element.state === 'espera toma') {
+        //                         waitTime += element.timeMili;
+        //                         if (maxWaitTime < element.timeMili) {
+        //                             maxWaitTime = element.timeMili;
+        //                         }
+        //                     }
+    
+        //                     if (element.state === 'en atencion' || element.state === 'en toma') {
+        //                         attentionTime += element.timeMili;
+        //                         if (maxWaitAttentionTime < element.timeMili) {
+        //                             maxWaitAttentionTime = element.timeMili;
+        //                         }
+        //                     }
+    
+        //                     serviceTime += element.timeMili;
+        //                 });
+
+        //                 const averageWaitTime = turns.length === 0 ? 0 : waitTime / turns.length;
+        //                 const averageAttentionTime = turns.length === 0 ? 0 : attentionTime / turns.length;
+        //                 const averageServiceTime = turns.length === 0 ? 0 : serviceTime / turns.length;
+
+        //                 resum.push({
+        //                     sucursal: suc,
+        //                     area: area,
+        //                     shiftsCreated: turns.length,
+        //                     canceledShifts: canceledShifts,
+        //                     shiftsFinished: shiftsFinished,
+        //                     averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
+        //                     averageAttentionTime: TraceHistoryController.msToTime(averageAttentionTime),
+        //                     averageServiceTime: TraceHistoryController.msToTime(averageServiceTime),
+        //                     maxWaitTime: TraceHistoryController.msToTime(maxWaitTime),
+        //                     maxWaitAttentionTime: TraceHistoryController.msToTime(maxWaitAttentionTime)
+        //                 });
+        //             }
+        //         });
+        //     });
+
+        //     return resum;
+        // } catch (error: any) {
+        //     throw error;
+        // }
+
         try {
-            const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
-
-            if (sucursal) {
-                let str = diacriticSensitiveRegex(sucursal);
-                query.push({ sucursal: { $regex: `^${str}$`, $options: "i" } });
-            }
-
-            let query2= {};
-            if (area) {
-                let str = diacriticSensitiveRegex(area);
-                query2 = { area: { $regex: `^${str}$`, $options: "i" } };
-            }
-
-            const res = await TraceHistory.aggregate([
-                {
-                    $match: { '$and': query }
-                },
-                {
-                    $lookup: {
-                         from: "TurnHistory",
-                         localField: "idTurn",
-                         foreignField: "_id",
-                         as: "dataTurn"
-                    }
-                },
-                { $unwind : "$dataTurn" },
-                {   $project: { 
-                        _id: 1,
-                        turn: 1,
-                        startDate: 1,
-                        finalDate: 1,
-                        state: 1,
-                        sucursal: 1,
-                        ubication: 1,
-                        sourceSection: 1,
-                        area: "$dataTurn.area"
-                    } 
-                },
-                {
-                    $match: query2
-                }
-            ]);
-
-            //Creacion de matriz de milisegundos
-            const sucursals: string[] = [];
-            const areas: string[] = [];
-            const table: any[] = [];
-            res.forEach(element => {
-                const start = moment(element.startDate);
-                const final = moment(element.finalDate);
-
-                table.push({
-                    sucursal: element.sucursal,
-                    area: element.area,
-                    turn: element.turn,
-                    state: element.state,
-                    sourceSection: element.sourceSection,
-                    timeMili: final.diff(start)
-                });
-
-                if (!sucursals.includes(element.sucursal)) {
-                    sucursals.push(element.sucursal);
-                }
-
-                if (!areas.includes(element.area)) {
-                    areas.push(element.area);
-                }
-            });
-
+            const res = await TraceHistoryController.detailedReport(startDate, finalDate, sucursal, area);
+        
             const resum: any[] = [];
-            sucursals.forEach(suc => {
-                const dataSucursal = table.filter(r => r.sucursal === suc);
-                areas.forEach(area => {
-                    const dataArea = dataSucursal.filter(r => r.area === area);
+            const resSuc = await RequestExternalAPI.request('GET', '/api/sucursal');
+            
+            for (let index = 0; index < resSuc.body.length; index++) {
+                const suc = resSuc.body[index];
+                const shiftsBySucursal = res.filter(r => r.sucursal === suc.name);
 
-                    const turns: string[] = [];
-                    let waitTime: number = 0;
-                    let serviceTime: number = 0;
-                    let attentionTime: number = 0;
-                    let canceledShifts: number = 0;
-                    let shiftsFinished: number = 0;
-                    let maxWaitTime: number = 0;
-                    let maxWaitAttentionTime: number = 0;
-
-                    dataArea.forEach(element => {
-                        if (element.state === 'espera') {
-                            turns.push(element.turn);
+                if (shiftsBySucursal.length) {
+                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${suc.name}`);
+                    if (resSucArea.body.length) {
+                        const auxAreas = [...resSucArea.body];
+                        for (let index2 = 0; index2 < resSucArea.body.length; index2++) {
+                            const element = {...resSucArea.body[index2]};
+                            if (element.area !== 'Resultados') {
+                                element.area = `Toma ${element.area}`;
+                                auxAreas.push(element);
+                            }
                         }
+    
+                        
+                        for (let index3 = 0; index3 < auxAreas.length; index3++) {
+                            const element = auxAreas[index3];
+                            const shiftsBySucursalAndArea = shiftsBySucursal.filter(r => r.area === element.area);
+    
+                            const maxWaitTime = Math.max.apply(Math, shiftsBySucursalAndArea.map((o) => { return o.wt; }));
+                            const maxWaitAttentionTime = Math.max.apply(Math, shiftsBySucursalAndArea.map((o) => { return o.at; }));
+    
+                            const canceledShifts = shiftsBySucursalAndArea.filter(r => r.lastState === 'cancelado').length;
 
-                        if (element.state === 'cancelado') {
-                            canceledShifts++;
-                        }
-
-                        if (element.state === 'terminado') {
-                            shiftsFinished++;
-                        }
-
-                        if (element.state === 're-call') {
-                            const tracesRes = dataArea.filter(r => r.sourceSection === element.sourceSection);
-                            const resFinish = tracesRes.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).day() ===  moment(element.startDate).day());
-                            if (resFinish) {
-                                attentionTime += element.timeMili;
-                                maxWaitAttentionTime += element.timeMili;
+                            let shiftsFinished = 0;
+                            if (element.area.includes('Toma')) {
+                                shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'terminado').length;
                             }
                             else {
-                                const resCancel = tracesRes.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
-                                if (resCancel) {
-                                    waitTime += element.timeMili;
-                                    maxWaitTime += element.timeMili;
-                                }
+                                shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'espera toma').length;
                             }
-                        }
-
-                        if (element.state === 'espera' || element.state === 'espera toma') {
-                            waitTime += element.timeMili;
-                            if (maxWaitTime < element.timeMili) {
-                                maxWaitTime = element.timeMili;
-                            }
-                        }
-
-                        if (element.state === 'en atencion' || element.state === 'en toma') {
-                            attentionTime += element.timeMili;
-                            if (maxWaitAttentionTime < element.timeMili) {
-                                maxWaitAttentionTime = element.timeMili;
-                            }
-                        }
-
-                        serviceTime += element.timeMili;
-                    });
-
-                    const averageWaitTime = turns.length === 0 ? 0 : waitTime / turns.length;
-                    const averageAttentionTime = turns.length === 0 ? 0 : attentionTime / turns.length;
-                    const averageServiceTime = turns.length === 0 ? 0 : serviceTime / turns.length;
-
-                    resum.push({
-                        sucursal: suc,
-                        area: area,
-                        shiftsCreated: turns.length,
-                        canceledShifts: canceledShifts,
-                        shiftsFinished: shiftsFinished,
-                        averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
-                        averageAttentionTime: TraceHistoryController.msToTime(averageAttentionTime),
-                        averageServiceTime: TraceHistoryController.msToTime(averageServiceTime),
-                        maxWaitTime: TraceHistoryController.msToTime(maxWaitTime),
-                        maxWaitAttentionTime: TraceHistoryController.msToTime(maxWaitAttentionTime)
-                    });
-                });
-            });
-
-            return resum;
-        } catch (error: any) {
-            throw error;
-        }
-    }
-
-    static async generalReportByHour(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
-        try {
-            const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
-
-            if (sucursal) {
-                let str = diacriticSensitiveRegex(sucursal);
-                query.push({ sucursal: { $regex: `^${str}$`, $options: "i" } });
-            }
-
-            let query2= {};
-            if (area) {
-                let str = diacriticSensitiveRegex(area);
-                query2 = { area: { $regex: `^${str}$`, $options: "i" } };
-            }
-
-            const res = await TraceHistory.aggregate([
-                {
-                    $match: { '$and': query }
-                },
-                {
-                    $lookup: {
-                         from: "TurnHistory",
-                         localField: "idTurn",
-                         foreignField: "_id",
-                         as: "dataTurn"
-                    }
-                },
-                { $unwind : "$dataTurn" },
-                {   $project: { 
-                        _id: 1,
-                        turn: 1,
-                        startDate: 1,
-                        finalDate: 1,
-                        state: 1,
-                        sucursal: 1,
-                        ubication: 1,
-                        sourceSection: 1,
-                        area: "$dataTurn.area"
-                    } 
-                },
-                {
-                    $match: query2
-                }
-            ]);
-
-            //Creacion de matriz de milisegundos
-            const sucursals: string[] = [];
-            const areas: string[] = [];
-            const table: any[] = [];
-            res.forEach(element => {
-                const start = moment(element.startDate);
-                const final = moment(element.finalDate);
-
-                table.push({
-                    id: element._id,
-                    sucursal: element.sucursal,
-                    area: element.area,
-                    turn: element.turn,
-                    state: element.state,
-                    timeMili: final.diff(start),
-                    sourceSection: element.sourceSection,
-                    startDate: element.startDate
-                });
-
-                if (!sucursals.includes(element.sucursal)) {
-                    sucursals.push(element.sucursal);
-                }
-
-                if (!areas.includes(element.area)) {
-                    areas.push(element.area);
-                }
-            });
-
-            const resum: any[] = [];
-            sucursals.forEach(suc => {
-                const dataSucursal = table.filter(r => r.sucursal === suc);
-                areas.forEach(area => {
-                    const dataArea = dataSucursal.filter(r => r.area === area);
-
-                    const interval = 30;
-                    const objectTracesTurnByInterval: any = {};
-                    let dateInit = moment().hour(0).minute(0);
-                    let dateFinish = moment().hour(0).minute(0);
-                    for (let index = 0; index < 48; index++) {
-                        const hour: string = dateInit.hour() < 10 ? `0${dateInit.hour()}` : dateInit.hour().toString();
-                        const minute: string = dateInit.minute() < 10 ? `0${dateInit.minute()}` : dateInit.minute().toString();
-                        const indexTime = `${hour}:${minute}`;
-                        
-                        dateFinish = dateFinish.add(interval, 'minute');
-                        let result: any[] = [];
-                        if (dateInit.hour() === dateFinish.hour()) {
-                            result = dataArea.filter(r => 
-                                moment(r.startDate).hour() === dateInit.hour() && 
-                                moment(r.startDate).minute() >= dateInit.minute() && 
-                                moment(r.startDate).minute() < dateFinish.minute());
-                        }
-                        else {
-                            result = dataArea.filter(r => 
-                                moment(r.startDate).hour() === dateInit.hour() && 
-                                moment(r.startDate).minute() >= dateInit.minute());
-                        }
-                        
-                        if (result && result.length) {
-                            objectTracesTurnByInterval[indexTime] = result;
-                        }
-                        dateInit = dateInit.add(interval, 'minute');
-                    }
-                    
-                    for (const key in objectTracesTurnByInterval) {
-
-                        const waitShifts: string[] = [];
-                        const attentionShifts: string[] = [];
-                        let waitTime: number = 0;
-                        let serviceTime: number = 0;
-                        let attentionTime: number = 0;
-                        let canceledShifts: number = 0;
-                        let shiftsFinished: number = 0;
-                        let maxWaitTime: number = 0;
-                        let maxWaitAttentionTime: number = 0;
-
-                        if (Object.prototype.hasOwnProperty.call(objectTracesTurnByInterval, key)) {
-                            let traces: any[] = objectTracesTurnByInterval[key];
                             
-                            traces.forEach(element => {
-                                if (element.state === 'espera') {
-                                    waitShifts.push(element.turn);
-                                }
-
-                                if (element.state === 'cancelado') {
-                                    canceledShifts++;
-                                }
-
-                                if (element.state === 'terminado') {
-                                    shiftsFinished++;
-                                }
-
-                                if (element.state === 're-call') {
-                                    // const tracesRes = traces.filter(r => r.sourceSection === element.sourceSection);
-                                    const resFinish = traces.find(r => r.turn === element.turn && (r.state === 'terminado' || (r.state === 'espera toma' && r.sourceSection === 'recepcion')) && moment(r.startDate).day() ===  moment(element.startDate).day());
-                                    if (resFinish) {
-                                        attentionTime += element.timeMili;
-                                        maxWaitAttentionTime += element.timeMili;
-                                    }
-                                    else {
-                                        const resCancel = traces.find(r => r.turn === element.turn && (r.state === 'cancelado' || (r.state === 'espera toma' && r.sourceSection === 'toma')) && moment(r.startDate).day() ===  moment(element.startDate).day());
-                                        if (resCancel) {
-                                            waitTime += element.timeMili;
-                                            maxWaitTime += element.timeMili;
-                                        }
-                                    }
-                                }
-
-                                if (element.state === 'espera' || element.state === 'espera toma') {
-                                    waitTime += element.timeMili;
-                                    if (maxWaitTime < element.timeMili) {
-                                        maxWaitTime = element.timeMili;
-                                    }
-                                }
-
-                                if (element.state === 'en atencion' || element.state === 'en toma') {
-                                    if (!attentionShifts.includes(element.turn)) {
-                                        attentionShifts.push(element.turn);
-                                    }
-                                    
-                                    attentionTime += element.timeMili;
-                                    if (maxWaitAttentionTime < element.timeMili) {
-                                        maxWaitAttentionTime = element.timeMili;
-                                    }
-                                }
-
-                                serviceTime += element.timeMili;
-                            });
-
-                            const averageWaitTime = waitShifts.length === 0 ? 0 : waitTime / waitShifts.length;
-                            const averageAttentionTime = attentionShifts.length === 0 ? 0 : attentionTime / attentionShifts.length;
-                            const averageServiceTime = waitShifts.length === 0 ? 0 : serviceTime / waitShifts.length;
+    
+                            const sumWaitTime = shiftsBySucursalAndArea.reduce((accumulator, object) => {
+                                return accumulator + object.wt;
+                            }, 0);
+    
+                            const sumAttentionTime = shiftsBySucursalAndArea.reduce((accumulator, object) => {
+                                return accumulator + object.at;
+                            }, 0);
+    
+                            const sumServiceTime = shiftsBySucursalAndArea.reduce((accumulator, object) => {
+                                return accumulator + object.st;
+                            }, 0);
+                            
+                            const averageWaitTime = shiftsBySucursalAndArea.length === 0 ? 0 : sumWaitTime / shiftsBySucursalAndArea.length;
+                            const averageAttentionTime = shiftsBySucursalAndArea.length === 0 ? 0 : sumAttentionTime / shiftsBySucursalAndArea.length;
+                            const averageServiceTime = shiftsBySucursalAndArea.length === 0 ? 0 : sumServiceTime / shiftsBySucursalAndArea.length;
 
                             resum.push({
-                                time: key,
-                                sucursal: suc,
-                                area: area,
-                                shiftsCreated: waitShifts.length,
+                                sucursal: suc.name,
+                                area: element.area,
+                                shiftsCreated: shiftsBySucursalAndArea.length,
                                 canceledShifts: canceledShifts,
                                 shiftsFinished: shiftsFinished,
                                 averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
@@ -352,11 +301,332 @@ class TraceHistoryController {
                             });
                         }
                     }
-                });
-            });
+                }
+            }
 
             return resum;
-        } catch (error: any) {
+        }
+        catch (error: any) {
+            throw error;
+        }
+    }
+
+    static async generalReportByHour(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
+        // try {
+        //     const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
+
+        //     if (sucursal) {
+        //         let str = diacriticSensitiveRegex(sucursal);
+        //         query.push({ sucursal: { $regex: `^${str}$`, $options: "i" } });
+        //     }
+
+        //     let query2= {};
+        //     if (area) {
+        //         let str = diacriticSensitiveRegex(area);
+        //         query2 = { area: { $regex: `^${str}$`, $options: "i" } };
+        //     }
+
+        //     const res = await TraceHistory.aggregate([
+        //         {
+        //             $match: { '$and': query }
+        //         },
+        //         {
+        //             $lookup: {
+        //                  from: "TurnHistory",
+        //                  localField: "idTurn",
+        //                  foreignField: "_id",
+        //                  as: "dataTurn"
+        //             }
+        //         },
+        //         { $unwind : "$dataTurn" },
+        //         {   $project: { 
+        //                 _id: 1,
+        //                 turn: 1,
+        //                 startDate: 1,
+        //                 finalDate: 1,
+        //                 state: 1,
+        //                 sucursal: 1,
+        //                 ubication: 1,
+        //                 sourceSection: 1,
+        //                 area: "$dataTurn.area"
+        //             } 
+        //         },
+        //         {
+        //             $match: query2
+        //         }
+        //     ]);
+
+        //     //Creacion de matriz de milisegundos
+        //     const sucursals: string[] = [];
+        //     const areas: string[] = [];
+        //     const table: any[] = [];
+        //     res.forEach(element => {
+        //         const start = moment(element.startDate);
+        //         const final = moment(element.finalDate);
+
+        //         table.push({
+        //             id: element._id,
+        //             sucursal: element.sucursal,
+        //             area: element.area,
+        //             turn: element.turn,
+        //             state: element.state,
+        //             timeMili: final.diff(start),
+        //             sourceSection: element.sourceSection,
+        //             startDate: element.startDate
+        //         });
+
+        //         if (!sucursals.includes(element.sucursal)) {
+        //             sucursals.push(element.sucursal);
+        //         }
+
+        //         if (!areas.includes(element.area)) {
+        //             areas.push(element.area);
+        //         }
+        //     });
+
+        //     const resum: any[] = [];
+        //     sucursals.forEach(suc => {
+        //         const dataSucursal = table.filter(r => r.sucursal === suc);
+        //         areas.forEach(area => {
+        //             const dataArea = dataSucursal.filter(r => r.area === area);
+
+        //             const interval = 30;
+        //             const objectTracesTurnByInterval: any = {};
+        //             let dateInit = moment().hour(0).minute(0);
+        //             let dateFinish = moment().hour(0).minute(0);
+        //             for (let index = 0; index < 48; index++) {
+        //                 const hour: string = dateInit.hour() < 10 ? `0${dateInit.hour()}` : dateInit.hour().toString();
+        //                 const minute: string = dateInit.minute() < 10 ? `0${dateInit.minute()}` : dateInit.minute().toString();
+        //                 const indexTime = `${hour}:${minute}`;
+                        
+        //                 dateFinish = dateFinish.add(interval, 'minute');
+        //                 let result: any[] = [];
+        //                 if (dateInit.hour() === dateFinish.hour()) {
+        //                     result = dataArea.filter(r => 
+        //                         moment(r.startDate).hour() === dateInit.hour() && 
+        //                         moment(r.startDate).minute() >= dateInit.minute() && 
+        //                         moment(r.startDate).minute() < dateFinish.minute());
+        //                 }
+        //                 else {
+        //                     result = dataArea.filter(r => 
+        //                         moment(r.startDate).hour() === dateInit.hour() && 
+        //                         moment(r.startDate).minute() >= dateInit.minute());
+        //                 }
+                        
+        //                 if (result && result.length) {
+        //                     objectTracesTurnByInterval[indexTime] = result;
+        //                 }
+        //                 dateInit = dateInit.add(interval, 'minute');
+        //             }
+                    
+        //             for (const key in objectTracesTurnByInterval) {
+
+        //                 const waitShifts: string[] = [];
+        //                 const attentionShifts: string[] = [];
+        //                 let waitTime: number = 0;
+        //                 let serviceTime: number = 0;
+        //                 let attentionTime: number = 0;
+        //                 let canceledShifts: number = 0;
+        //                 let shiftsFinished: number = 0;
+        //                 let maxWaitTime: number = 0;
+        //                 let maxWaitAttentionTime: number = 0;
+
+        //                 if (Object.prototype.hasOwnProperty.call(objectTracesTurnByInterval, key)) {
+        //                     let traces: any[] = objectTracesTurnByInterval[key];
+                            
+        //                     traces.forEach(element => {
+        //                         if (element.state === 'espera') {
+        //                             waitShifts.push(element.turn);
+        //                         }
+
+        //                         if (element.state === 'cancelado') {
+        //                             canceledShifts++;
+        //                         }
+
+        //                         if (element.state === 'terminado') {
+        //                             shiftsFinished++;
+        //                         }
+
+        //                         if (element.state === 're-call') {
+        //                             // const tracesRes = traces.filter(r => r.sourceSection === element.sourceSection);
+        //                             const resFinish = traces.find(r => r.turn === element.turn && (r.state === 'terminado' || (r.state === 'espera toma' && r.sourceSection === 'recepcion')) && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                             if (resFinish) {
+        //                                 attentionTime += element.timeMili;
+        //                                 maxWaitAttentionTime += element.timeMili;
+        //                             }
+        //                             else {
+        //                                 const resCancel = traces.find(r => r.turn === element.turn && (r.state === 'cancelado' || (r.state === 'espera toma' && r.sourceSection === 'toma')) && moment(r.startDate).day() ===  moment(element.startDate).day());
+        //                                 if (resCancel) {
+        //                                     waitTime += element.timeMili;
+        //                                     maxWaitTime += element.timeMili;
+        //                                 }
+        //                             }
+        //                         }
+
+        //                         if (element.state === 'espera' || element.state === 'espera toma') {
+        //                             waitTime += element.timeMili;
+        //                             if (maxWaitTime < element.timeMili) {
+        //                                 maxWaitTime = element.timeMili;
+        //                             }
+        //                         }
+
+        //                         if (element.state === 'en atencion' || element.state === 'en toma') {
+        //                             if (!attentionShifts.includes(element.turn)) {
+        //                                 attentionShifts.push(element.turn);
+        //                             }
+                                    
+        //                             attentionTime += element.timeMili;
+        //                             if (maxWaitAttentionTime < element.timeMili) {
+        //                                 maxWaitAttentionTime = element.timeMili;
+        //                             }
+        //                         }
+
+        //                         serviceTime += element.timeMili;
+        //                     });
+
+        //                     const averageWaitTime = waitShifts.length === 0 ? 0 : waitTime / waitShifts.length;
+        //                     const averageAttentionTime = attentionShifts.length === 0 ? 0 : attentionTime / attentionShifts.length;
+        //                     const averageServiceTime = waitShifts.length === 0 ? 0 : serviceTime / waitShifts.length;
+
+        //                     resum.push({
+        //                         time: key,
+        //                         sucursal: suc,
+        //                         area: area,
+        //                         shiftsCreated: waitShifts.length,
+        //                         canceledShifts: canceledShifts,
+        //                         shiftsFinished: shiftsFinished,
+        //                         averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
+        //                         averageAttentionTime: TraceHistoryController.msToTime(averageAttentionTime),
+        //                         averageServiceTime: TraceHistoryController.msToTime(averageServiceTime),
+        //                         maxWaitTime: TraceHistoryController.msToTime(maxWaitTime),
+        //                         maxWaitAttentionTime: TraceHistoryController.msToTime(maxWaitAttentionTime)
+        //                     });
+        //                 }
+        //             }
+        //         });
+        //     });
+
+        //     return resum;
+        // } catch (error: any) {
+        //     throw error;
+        // }
+
+        try {
+            const res = await TraceHistoryController.detailedReport(startDate, finalDate, sucursal, area);
+        
+            const resum: any[] = [];
+            const resSuc = await RequestExternalAPI.request('GET', '/api/sucursal');
+            
+            for (let index = 0; index < resSuc.body.length; index++) {
+                const suc = resSuc.body[index];
+                const shiftsBySucursal = res.filter(r => r.sucursal === suc.name);
+
+                if (shiftsBySucursal.length) {
+                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${suc.name}`);
+                    if (resSucArea.body.length) {
+                        const auxAreas = [...resSucArea.body];
+                        for (let index2 = 0; index2 < resSucArea.body.length; index2++) {
+                            const element = {...resSucArea.body[index2]};
+                            if (element.area !== 'Resultados') {
+                                element.area = `Toma ${element.area}`;
+                                auxAreas.push(element);
+                            }
+                        }
+    
+                        
+                        for (let index3 = 0; index3 < auxAreas.length; index3++) {
+                            const element = auxAreas[index3];
+                            const shiftsBySucursalAndArea = shiftsBySucursal.filter(r => r.area === element.area);
+    //------------------------------------------------------------------------------------
+                            const interval = 30;
+                            const objectTracesTurnByInterval: any = {};
+                            let dateInit = moment().hour(0).minute(0);
+                            let dateFinish = moment().hour(0).minute(0);
+                            for (let index = 0; index < 48; index++) {
+                                const hour: string = dateInit.hour() < 10 ? `0${dateInit.hour()}` : dateInit.hour().toString();
+                                const minute: string = dateInit.minute() < 10 ? `0${dateInit.minute()}` : dateInit.minute().toString();
+                                const indexTime = `${hour}:${minute}`;
+                                
+                                dateFinish = dateFinish.add(interval, 'minute');
+                                let result: any[] = [];
+                                if (dateInit.hour() === dateFinish.hour()) {
+                                    result = shiftsBySucursalAndArea.filter(r => 
+                                        moment(r.startDate).hour() === dateInit.hour() && 
+                                        moment(r.startDate).minute() >= dateInit.minute() && 
+                                        moment(r.startDate).minute() < dateFinish.minute());
+                                }
+                                else {
+                                    result = shiftsBySucursalAndArea.filter(r => 
+                                        moment(r.startDate).hour() === dateInit.hour() && 
+                                        moment(r.startDate).minute() >= dateInit.minute());
+                                }
+                                
+                                if (result && result.length) {
+                                    objectTracesTurnByInterval[indexTime] = result;
+                                }
+                                dateInit = dateInit.add(interval, 'minute');
+                            }
+                            
+
+
+
+                            for (const key in objectTracesTurnByInterval) {
+                                if (Object.prototype.hasOwnProperty.call(objectTracesTurnByInterval, key)) {
+                                    let traces: any[] = objectTracesTurnByInterval[key];
+
+                                    const maxWaitTime = Math.max.apply(Math, traces.map((o) => { return o.wt; }));
+                                    const maxWaitAttentionTime = Math.max.apply(Math, traces.map((o) => { return o.at; }));
+            
+                                    const canceledShifts = traces.filter(r => r.lastState === 'cancelado').length;
+        
+                                    let shiftsFinished = 0;
+                                    if (element.area.includes('Toma')) {
+                                        shiftsFinished = traces.filter(r => r.lastState === 'terminado').length;
+                                    }
+                                    else {
+                                        shiftsFinished = traces.filter(r => r.lastState === 'espera toma').length;
+                                    }
+                                    
+            
+                                    const sumWaitTime = traces.reduce((accumulator, object) => {
+                                        return accumulator + object.wt;
+                                    }, 0);
+            
+                                    const sumAttentionTime = traces.reduce((accumulator, object) => {
+                                        return accumulator + object.at;
+                                    }, 0);
+            
+                                    const sumServiceTime = traces.reduce((accumulator, object) => {
+                                        return accumulator + object.st;
+                                    }, 0);
+                                    
+                                    const averageWaitTime = traces.length === 0 ? 0 : sumWaitTime / traces.length;
+                                    const averageAttentionTime = traces.length === 0 ? 0 : sumAttentionTime / traces.length;
+                                    const averageServiceTime = traces.length === 0 ? 0 : sumServiceTime / traces.length;
+
+                                    resum.push({
+                                        time: key,
+                                        sucursal: suc.name,
+                                        area: element.area,
+                                        shiftsCreated: traces.length,
+                                        canceledShifts: canceledShifts,
+                                        shiftsFinished: shiftsFinished,
+                                        averageWaitTime: TraceHistoryController.msToTime(averageWaitTime),
+                                        averageAttentionTime: TraceHistoryController.msToTime(averageAttentionTime),
+                                        averageServiceTime: TraceHistoryController.msToTime(averageServiceTime),
+                                        maxWaitTime: TraceHistoryController.msToTime(maxWaitTime),
+                                        maxWaitAttentionTime: TraceHistoryController.msToTime(maxWaitAttentionTime)
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resum;
+        }
+        catch (error: any) {
             throw error;
         }
     }
@@ -448,6 +718,7 @@ class TraceHistoryController {
                         r.turn === turn.turn && 
                         moment(turn.startDate).format('YYYY-MM-DD') === moment(r.startDate).format('YYYY-MM-DD'));
                         
+                        
                         // if (traces.length && traces[0].turn === 'L001') {
                         //     const data = {
                         //         turn: traces[0].turn,
@@ -467,6 +738,13 @@ class TraceHistoryController {
 
                         const tracesReception = traces.filter(r => r.sourceSection === 'recepcion');
                         const tracesToma = traces.filter(r => r.sourceSection === 'toma');
+
+                        const lastStateReception = tracesReception[tracesReception.length - 1].state;
+
+                        let lastStateToma = '';
+                        if (tracesToma.length && tracesToma[tracesToma.length - 1]) {
+                            lastStateToma = tracesToma[tracesToma.length - 1].state;
+                        }
 
                         tracesReception.forEach(element => {
                             if (element.state === 'en atencion') {
@@ -514,6 +792,10 @@ class TraceHistoryController {
                             endingTime: hourFinish,
                             waitTime: TraceHistoryController.msToTime(waitTime),
                             attentionTime: TraceHistoryController.msToTime(attentionTime),
+                            wt: waitTime,
+                            at: attentionTime,
+                            st: waitTime + attentionTime,
+                            lastState: lastStateReception,
                             startDate: turn.startDate
                         });
 
@@ -570,6 +852,10 @@ class TraceHistoryController {
                                 endingTime: hourFinish,
                                 waitTime: TraceHistoryController.msToTime(waitTime),
                                 attentionTime: TraceHistoryController.msToTime(attentionTime),
+                                wt: waitTime,
+                                at: attentionTime,
+                                st: waitTime + attentionTime,
+                                lastState: lastStateToma,
                                 startDate: turn.startDate
                             });                            
                         }
@@ -601,7 +887,9 @@ class TraceHistoryController {
         const seconds = Math.floor((duration / 1000) % 60);
         const minutes = Math.floor((duration / (1000 * 60)) % 60);
         const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+        // const days = Math.floor((duration / (1000 * 60 * 60 * 24)) % 30);
       
+        // const d = (days < 10) ? "0" + days : days;
         const h = (hours < 10) ? "0" + hours : hours;
         const m = (minutes < 10) ? "0" + minutes : minutes;
         const s = (seconds < 10) ? "0" + seconds : seconds;
