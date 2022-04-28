@@ -248,8 +248,9 @@ class TraceHistoryController {
                             const element = {...resSucArea.body[index2]};
                             if (element.area !== 'Resultados') {
                                 element.area = `Toma ${element.area}`;
-                                auxAreas.push(element);
                             }
+
+                            auxAreas.push(element);
                         }
     
                         
@@ -529,8 +530,9 @@ class TraceHistoryController {
                             const element = {...resSucArea.body[index2]};
                             if (element.area !== 'Resultados') {
                                 element.area = `Toma ${element.area}`;
-                                auxAreas.push(element);
                             }
+
+                            auxAreas.push(element);
                         }
     
                         
