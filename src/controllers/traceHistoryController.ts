@@ -589,7 +589,7 @@ class TraceHistoryController {
                                         shiftsFinished = traces.filter(r => r.lastState === 'terminado').length;
                                     }
                                     else if (element.area === 'Resultados') {
-                                        shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'terminado').length;
+                                        shiftsFinished = traces.filter(r => r.lastState === 'terminado').length;
                                     }
                                     else {
                                         shiftsFinished = traces.filter(r => r.lastState === 'espera toma').length;
