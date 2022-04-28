@@ -267,6 +267,9 @@ class TraceHistoryController {
                             if (element.area.includes('Toma')) {
                                 shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'terminado').length;
                             }
+                            else if (element.area === 'Resultados') {
+                                shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'terminado').length;
+                            }
                             else {
                                 shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'espera toma').length;
                             }
@@ -584,6 +587,9 @@ class TraceHistoryController {
                                     let shiftsFinished = 0;
                                     if (element.area.includes('Toma')) {
                                         shiftsFinished = traces.filter(r => r.lastState === 'terminado').length;
+                                    }
+                                    else if (element.area === 'Resultados') {
+                                        shiftsFinished = shiftsBySucursalAndArea.filter(r => r.lastState === 'terminado').length;
                                     }
                                     else {
                                         shiftsFinished = traces.filter(r => r.lastState === 'espera toma').length;
