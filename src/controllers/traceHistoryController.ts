@@ -2,6 +2,7 @@ import TraceHistory from '../models/traceHistory';
 import { RequestExternalAPI } from "../utils/requestExternalAPI";
 import moment from "moment";
 import { diacriticSensitiveRegex } from "../models/utils/queryRequest";
+import querystring  from "querystring";
 
 class TraceHistoryController {
     static async generalReport(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
@@ -241,7 +242,8 @@ class TraceHistoryController {
                 const shiftsBySucursal = res.filter(r => r.sucursal === suc.name);
 
                 if (shiftsBySucursal.length) {
-                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${suc.name}`);
+                    const sucName = querystring.escape(suc.name);
+                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${sucName}`);
                     if (resSucArea.body.length) {
                         const auxAreas = [...resSucArea.body];
                         for (let index2 = 0; index2 < resSucArea.body.length; index2++) {
@@ -526,7 +528,8 @@ class TraceHistoryController {
                 const shiftsBySucursal = res.filter(r => r.sucursal === suc.name);
 
                 if (shiftsBySucursal.length) {
-                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${suc.name}`);
+                    const sucName = querystring.escape(suc.name);
+                    const resSucArea = await RequestExternalAPI.request('GET', `/api/area-sucursal/${sucName}`);
                     if (resSucArea.body.length) {
                         const auxAreas = [...resSucArea.body];
                         for (let index2 = 0; index2 < resSucArea.body.length; index2++) {
