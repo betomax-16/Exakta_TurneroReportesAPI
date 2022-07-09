@@ -220,7 +220,14 @@ class TraceHistoryController {
 
     static async detailedReport(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
         try {
-            const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
+            const query: any[] = [ 
+                { startDate: { '$gte': startDate } }, 
+                { '$or': [
+                        { finalDate: {'$lte': finalDate } },
+                        { finalDate: { $exists: false } }
+                    ] 
+                } 
+            ];
             
             if (sucursal) {
                 let str = diacriticSensitiveRegex(sucursal);
@@ -303,9 +310,10 @@ class TraceHistoryController {
                 
                 shifts.forEach(turn => {
                     // console.log(`------------${turn.turn}-----------`);
-                    const traces = dataSucursal.filter(r => 
-                        r.turn === turn.turn && 
-                        moment(turn.startDate).format('YYYY-MM-DD') === moment(r.startDate).format('YYYY-MM-DD'));
+                    // const traces = dataSucursal.filter(r => 
+                    //     r.turn === turn.turn && 
+                    //     moment(turn.startDate).format('YYYY-MM-DD') === moment(r.startDate).format('YYYY-MM-DD'));
+                    const traces = dataSucursal.filter(r => r.idTurn.toString() === turn.idTurn.toString());
                         
                         
                         // if (traces.length && traces[0].turn === 'L001') {
@@ -343,7 +351,10 @@ class TraceHistoryController {
                             }
 
                             if (element.state === 'espera toma' || element.state === 'terminado' || element.state === 'cancelado'|| element.state === 'en atencion') {
-                                hourFinish = moment(element.startDate).format('HH:mm:ss');
+                                if (element.state === 'espera toma') {
+                                    tracesToma.unshift(element);
+                                }
+                                hourFinish =  element.state !== 'en atencion' ? moment(element.startDate).format('HH:mm:ss') : moment(element.finalDate).format('HH:mm:ss');
                             }
 
                             if (element.state === 're-call') {
@@ -435,8 +446,13 @@ class TraceHistoryController {
                             });
 
                             if (hourFinish === '' && tracesToma.length) {
-                                hourFinish = moment(tracesToma[0].startDate).hour(23).minute(59).second(59).millisecond(999).format('HH:mm:ss');
-                                attentionTime = moment(tracesToma[0].startDate).hour(23).minute(59).second(59).millisecond(999).diff(tracesToma[0].startDate)
+                                if (hourCall !== '') {
+                                    hourFinish = moment(tracesToma[0].startDate).hour(23).minute(59).second(59).millisecond(999).format('HH:mm:ss');
+                                    attentionTime = moment(tracesToma[0].startDate).hour(23).minute(59).second(59).millisecond(999).diff(tracesToma[0].startDate)
+                                }
+                                else {
+                                    waitTime = moment(tracesToma[0].startDate).hour(23).minute(59).second(59).millisecond(999).diff(tracesToma[0].startDate)
+                                }
                             }
 
                             resum.push({
