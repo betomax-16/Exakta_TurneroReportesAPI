@@ -221,12 +221,8 @@ class TraceHistoryController {
     static async detailedReport(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
         try {
             const query: any[] = [ 
-                { startDate: { '$gte': startDate } }, 
-                { '$or': [
-                        { finalDate: {'$lte': finalDate } },
-                        { finalDate: { $exists: false } }
-                    ] 
-                } 
+                { createdAt: { '$gte': startDate } }, 
+                { createdAt: { '$lte': finalDate } },  
             ];
             
             if (sucursal) {

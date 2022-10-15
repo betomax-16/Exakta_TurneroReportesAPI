@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import path from "path";
 import fs = require('fs');
+import CronTask, { reportMount, reportWeek } from './utils/cronTask';
 
 class Server {
     public app: Application;
@@ -34,7 +35,7 @@ class Server {
           }
           else if (MODE === 'TEST') {
             dataBase = MONGO_URI_TEST || '';
-            mongoose.connect(dataBase, { replicaSet: 'testrep' });
+            mongoose.connect(dataBase, { replicaSet: 'testrep', w: 1});
           }
           else if (MODE === 'DEV') {
             dataBase = MONGO_URI_DEV || '';
@@ -54,6 +55,7 @@ class Server {
             // new initDB();
         });
 
+        new CronTask([reportWeek, reportMount]);
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false}));
