@@ -1,6 +1,5 @@
 import { CronJob } from 'cron';
 import moment from "moment";
-import writeXlsxFile from 'write-excel-file/node';
 let xl = require('excel4node');
 import nodemailer from "nodemailer";
 import traceHistoryController from "../controllers/traceHistoryController";
@@ -13,16 +12,13 @@ export default class CronTask {
   }
 }
 
-async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate: moment.Moment) {
+async function sendReportGeneral(startDate: moment.Moment, selectedDate: moment.Moment) {
     const generalReport = await traceHistoryController.generalReport(startDate.toDate(), selectedDate.toDate());
 
     const wb = new xl.Workbook();
     const ws1 = wb.addWorksheet('Sheet 1');
-    const ws2 = wb.addWorksheet('Sheet 2');
-    const ws3 = wb.addWorksheet('Sheet 3');
     const style = wb.createStyle({
         font: {
-            color: '#FF0800',
             size: 12,
         }
     });
@@ -81,6 +77,51 @@ async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate
     }
     console.log('Ok General');
 
+    wb.write('./src/reports/general.xlsx');
+
+
+
+    let transporter = nodemailer.createTransport({
+        host: "in-v3.mailjet.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: '7e94ae16e5b7f680ec64c77cede0cd2e', // generated ethereal user
+          pass: 'ad9bead630772f2b44bb9710f7654899', // generated ethereal password
+        },
+    });
+
+    const body = `Formato de Tiempo: Horas:Minutos:Segundos:Milisegundos \n
+Tiempo de espera: Tiempo en que el paciente demora en ser llamado a atencion de un area determinada [recepcion o area de toma de muestras].\n
+Tiempo de atencion: Tiempo en que el paciente demora en ser atendido en un area determinada [recepcion o area de toma de muestras].\n
+Tiempo promedio de servicio: Tiempo promedio en que el paciente demora en ser atendido en el area de toma de muestras.\n
+Tiempo promedio de atencion: Tiempo promedio en que el paciente demora en ser atendido en el area de recepcion para toma de sus datos.\n
+Tiempo promedio de espera: Tiempo promedio en que el paciente demora ser llamado a atencion de un area determinada [recepcion o area de toma de muestras].\n`;
+
+    let info = await transporter.sendMail({
+        from: '"Ing. Roberto Castillo Medina 🚀" <resultados@exaktadiagnostikos.com.mx>', // sender address
+        to: "roberto.castillo@exakta.mx, israel.ruiz@exakta.mx", // list of receivers
+        subject: `Reportes turnero [${startDate.format('DD-MM-YYYY')} - ${selectedDate.format('DD-MM-YYYY')}]`, // Subject line
+        text: body, // plain text body
+        attachments: [
+            {   // file on disk as an attachment
+                filename: 'general.xlsx',
+                path: './src/reports/general.xlsx' // stream this file
+            }
+        ]
+    });
+
+    console.log("Message sent: %s", info.messageId);
+}
+
+async function sendReportByHour(startDate: moment.Moment, selectedDate: moment.Moment) {
+    const wb = new xl.Workbook();
+    const ws1 = wb.addWorksheet('Sheet 1');
+    const style = wb.createStyle({
+        font: {
+            size: 12,
+        }
+    });
 
     const generalReportByHour = await traceHistoryController.generalReportByHour(startDate.toDate(), selectedDate.toDate());
     const HEADER_ROW_BY_HOUR = [
@@ -132,21 +173,65 @@ async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate
 
     for (let index = 0; index < HEADER_ROW_BY_HOUR.length; index++) {
         const column = HEADER_ROW_BY_HOUR[index];
-        ws2.cell(1, index + 1).string(column.value).style(style);
+        ws1.cell(1, index + 1).string(column.value).style(style);
     }
 
     for (let fila = 0; fila < generalReportByHour.length; fila++) {
         const row = generalReportByHour[fila];
         let column = 1;
         for (const property in row) {
-            ws2.cell(fila + 2, column).string(row[property].toString()).style(style);
+            ws1.cell(fila + 2, column).string(row[property].toString()).style(style);
             column++;
         }
     }
 
     console.log('Ok By Hour');
 
+    wb.write('./src/reports/30min.xlsx');
 
+
+
+    let transporter = nodemailer.createTransport({
+        host: "in-v3.mailjet.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: '7e94ae16e5b7f680ec64c77cede0cd2e', // generated ethereal user
+          pass: 'ad9bead630772f2b44bb9710f7654899', // generated ethereal password
+        },
+    });
+
+    const body = `Formato de Tiempo: Horas:Minutos:Segundos:Milisegundos \n
+Tiempo de espera: Tiempo en que el paciente demora en ser llamado a atencion de un area determinada [recepcion o area de toma de muestras].\n
+Tiempo de atencion: Tiempo en que el paciente demora en ser atendido en un area determinada [recepcion o area de toma de muestras].\n
+Tiempo promedio de servicio: Tiempo promedio en que el paciente demora en ser atendido en el area de toma de muestras.\n
+Tiempo promedio de atencion: Tiempo promedio en que el paciente demora en ser atendido en el area de recepcion para toma de sus datos.\n
+Tiempo promedio de espera: Tiempo promedio en que el paciente demora ser llamado a atencion de un area determinada [recepcion o area de toma de muestras].\n`;
+
+    let info = await transporter.sendMail({
+        from: '"Ing. Roberto Castillo Medina 🚀" <resultados@exaktadiagnostikos.com.mx>', // sender address
+        to: "roberto.castillo@exakta.mx, israel.ruiz@exakta.mx", // list of receivers
+        subject: `Reportes turnero [${startDate.format('DD-MM-YYYY')} - ${selectedDate.format('DD-MM-YYYY')}]`, // Subject line
+        text: body, // plain text body
+        attachments: [
+            {   // file on disk as an attachment
+                filename: '30min.xlsx',
+                path: './src/reports/30min.xlsx' // stream this file
+            }
+        ]
+    });
+
+    console.log("Message sent: %s", info.messageId);
+}
+
+async function sendReportDetail(startDate: moment.Moment, selectedDate: moment.Moment) {
+    const wb = new xl.Workbook();
+    const ws1 = wb.addWorksheet('Sheet 1');
+    const style = wb.createStyle({
+        font: {
+            size: 12,
+        }
+    });
 
     const detailReport = await traceHistoryController.detailedReport(startDate.toDate(), selectedDate.toDate());
 
@@ -195,7 +280,7 @@ async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate
 
     for (let index = 0; index < HEADER_ROW_DETAIL.length; index++) {
         const column = HEADER_ROW_DETAIL[index];
-        ws3.cell(1, index + 1).string(column.value).style(style);
+        ws1.cell(1, index + 1).string(column.value).style(style);
     }
 
     for (let fila = 0; fila < detailReport.length; fila++) {
@@ -203,7 +288,7 @@ async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate
         let column = 1;
         for (const property in row) {
             if (property !== 'wt' && property !== 'at' && property !== 'st' && property !== 'lastState' && property !== 'startDate') {
-                ws3.cell(fila + 2, column).string(row[property].toString()).style(style);
+                ws1.cell(fila + 2, column).string(row[property].toString()).style(style);
                 column++;  
             }
         }
@@ -211,7 +296,7 @@ async function createReportsAndSendEmails(startDate: moment.Moment, selectedDate
 
     console.log('Ok Detail');
 
-    wb.write('./src/reports/report.xlsx');
+    wb.write('./src/reports/detalle.xlsx');
 
 
 
@@ -234,13 +319,13 @@ Tiempo promedio de espera: Tiempo promedio en que el paciente demora ser llamado
 
     let info = await transporter.sendMail({
         from: '"Ing. Roberto Castillo Medina 🚀" <resultados@exaktadiagnostikos.com.mx>', // sender address
-        to: "roberto.castillo@exakta.mx", // list of receivers
+        to: "roberto.castillo@exakta.mx, israel.ruiz@exakta.mx", // list of receivers
         subject: `Reportes turnero [${startDate.format('DD-MM-YYYY')} - ${selectedDate.format('DD-MM-YYYY')}]`, // Subject line
         text: body, // plain text body
         attachments: [
             {   // file on disk as an attachment
-                filename: 'general.xlsx',
-                path: './src/reports/report.xlsx' // stream this file
+                filename: 'detalle.xlsx',
+                path: './src/reports/detalle.xlsx' // stream this file
             }
         ]
     });
@@ -248,16 +333,18 @@ Tiempo promedio de espera: Tiempo promedio en que el paciente demora ser llamado
     console.log("Message sent: %s", info.messageId);
 }
 
-export function reportWeek() {
+export function reportWeekGeneral() {
     //0 0 * * * -> todos los dias a las 12AM
     //0 3 * * 1 (a las 3AM todos los lunes)
     const cronJob: CronJob = new CronJob('0 3 * * 1', async () => {
         try {
+            console.log('HOLA GENERAL');
+            
             const currentDate = moment().hour(0).minute(0).second(0).millisecond(0);
             const startDate = currentDate.add(-(currentDate.date() - 1), 'day');
             const selectedDate = moment();
             
-            createReportsAndSendEmails(startDate, selectedDate);
+            sendReportGeneral(startDate, selectedDate);
         } catch (e) {
           console.error(e);
         }
@@ -268,15 +355,95 @@ export function reportWeek() {
     }
 }
 
-export function reportMount() {
+export function reportWeekByHour() {
+    //0 0 * * * -> todos los dias a las 12AM
+    //0 3 * * 1 (a las 3AM todos los lunes)
+    const cronJob: CronJob = new CronJob('2 3 * * 1', async () => {
+        try {
+            console.log('HOLA BY HOUR');
+            const currentDate = moment().hour(0).minute(0).second(0).millisecond(0);
+            const startDate = currentDate.add(-(currentDate.date() - 1), 'day');
+            const selectedDate = moment();
+            
+            sendReportByHour(startDate, selectedDate);
+        } catch (e) {
+          console.error(e);
+        }
+    });
+
+    if (!cronJob.running) {
+        cronJob.start();
+    }
+}
+
+export function reportWeekDetail() {
+    //0 0 * * * -> todos los dias a las 12AM
+    //0 3 * * 1 (a las 3AM todos los lunes)
+    const cronJob: CronJob = new CronJob('4 3 * * 1', async () => {
+        try {
+            console.log('HOLA DETALLE');
+            const currentDate = moment().hour(0).minute(0).second(0).millisecond(0);
+            const startDate = currentDate.add(-(currentDate.date() - 1), 'day');
+            const selectedDate = moment();
+            
+            sendReportDetail(startDate, selectedDate);
+        } catch (e) {
+          console.error(e);
+        }
+    });
+
+    if (!cronJob.running) {
+        cronJob.start();
+    }
+}
+
+export function reportMountGeneral() {
     // 0 0 1 * * (cada primero de mes)
-    const cronJob: CronJob = new CronJob('0 0 1 * *', async () => {
+    const cronJob: CronJob = new CronJob('6 3 1 * *', async () => {
         try {
             const selectedDate = moment().add(-1, "day");
             const aux = moment().add(-1, "day");
             const startDate = aux.add(-(aux.date() - 1), 'day');
 
-            createReportsAndSendEmails(startDate, selectedDate);
+            sendReportGeneral(startDate, selectedDate);
+        } catch (e) {
+          console.error(e);
+        }
+    });
+
+    if (!cronJob.running) {
+        cronJob.start();
+    }
+}
+
+export function reportMountByHour() {
+    // 0 0 1 * * (cada primero de mes)
+    const cronJob: CronJob = new CronJob('8 3 1 * *', async () => {
+        try {
+            const selectedDate = moment().add(-1, "day");
+            const aux = moment().add(-1, "day");
+            const startDate = aux.add(-(aux.date() - 1), 'day');
+
+            sendReportByHour(startDate, selectedDate);
+        } catch (e) {
+          console.error(e);
+        }
+    });
+
+    if (!cronJob.running) {
+        cronJob.start();
+    }
+}
+
+export function reportMountDetail() {
+    // 0 0 1 * * (cada primero de mes)
+    const cronJob: CronJob = new CronJob('10 3 1 * *', async () => {
+        try {
+            const selectedDate = moment().add(-1, "day");
+            const aux = moment().add(-1, "day");
+            const startDate = aux.add(-(aux.date() - 1), 'day');
+
+            sendReportDetail(startDate, selectedDate);
         } catch (e) {
           console.error(e);
         }
