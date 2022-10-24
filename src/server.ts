@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import path from "path";
 import fs = require('fs');
-import CronTask, { reportMountGeneral, reportMountByHour, reportMountDetail, reportWeekGeneral, reportWeekByHour, reportWeekDetail } from './utils/cronTask';
+import CronTask, { reportWeek, reportMount } from './utils/cronTask';
 
 class Server {
     public app: Application;
@@ -55,7 +55,7 @@ class Server {
             // new initDB();
         });
 
-        new CronTask([reportWeekGeneral, reportWeekByHour, reportWeekDetail, reportMountGeneral, reportMountByHour, reportMountDetail]);
+        new CronTask([reportWeek, reportMount]);
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false}));
